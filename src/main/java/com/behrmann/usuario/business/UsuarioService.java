@@ -4,9 +4,12 @@ import com.behrmann.usuario.business.converter.UsuarioConverter;
 import com.behrmann.usuario.business.dto.UsuarioDTO;
 import com.behrmann.usuario.infraestructure.entity.Usuario;
 import com.behrmann.usuario.infraestructure.exceptions.ConflictException;
+import com.behrmann.usuario.infraestructure.exceptions.ResourceNotFoundException;
 import com.behrmann.usuario.infraestructure.repository.UsuarioRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +45,15 @@ public class UsuarioService {
 
     public boolean verificaEmailExistente(String email) {
         return usuarioRepository.existsByEmail(email);
+    }
+
+    public Usuario buscaUsuarioPorEmail(String email){
+        return usuarioRepository.findByEmail(email).orElseThrow(
+                () -> new ResourceNotFoundException("Email não encontrado " + email));
+    }
+
+    public void deletaUsuarioPorEmail(String email){
+        usuarioRepository.deleteByEmail(email);
     }
 
 }
