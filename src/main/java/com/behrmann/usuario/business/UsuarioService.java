@@ -8,6 +8,7 @@ import com.behrmann.usuario.infraestructure.exceptions.ResourceNotFoundException
 import com.behrmann.usuario.infraestructure.repository.UsuarioRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,11 +17,13 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioConverter usuarioConverter;
+    private final PasswordEncoder passwordEncoder;
 
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO){
         try {
             Usuario usuario = usuarioConverter.paraUsuario(usuarioDTO);
             emailExiste(usuario.getEmail());
+            usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
             return usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuario));
         } catch (ConflictException e) {
            throw  new ConflictException("Email já cadastrado ", e.getCause());
