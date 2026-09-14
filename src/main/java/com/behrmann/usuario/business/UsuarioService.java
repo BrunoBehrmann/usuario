@@ -6,10 +6,8 @@ import com.behrmann.usuario.infraestructure.entity.Usuario;
 import com.behrmann.usuario.infraestructure.exceptions.ConflictException;
 import com.behrmann.usuario.infraestructure.exceptions.ResourceNotFoundException;
 import com.behrmann.usuario.infraestructure.repository.UsuarioRepository;
+import com.behrmann.usuario.infraestructure.security.JwtUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +18,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioConverter usuarioConverter;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO){
         try {
@@ -54,6 +53,19 @@ public class UsuarioService {
 
     public void deletaUsuarioPorEmail(String email){
         usuarioRepository.deleteByEmail(email);
+    }
+
+    public UsuarioDTO atualizaDadosUsuario(String token, UsuarioDTO usuarioDTO){
+        String email = jwtUtil.extrairEmailToken(token.substring(7));
+
+        usuarioDTO.setSenha(usuarioDTO.getSenha() != null ? passwordEncoder.encode(usuarioDTO.getSenha()) : null);
+
+        Usuario usuarioEntity = usuarioRepository.findByEmail(email).orElseThrow(
+                () -> new ResourceNotFoundException("Email não localizado"));
+        // mesclando dados DTO com os dados do BD
+        Usuario usuario = usuarioConverter.updateUsuario(usuarioDTO, usuarioEntity);
+
+        return  usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuario));
     }
 
 }
