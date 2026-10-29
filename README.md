@@ -1,3 +1,13 @@
+## Estrutura
+### Spring
+#### Dependencias:
+- Lombok
+- Spring Web
+- Spring Security
+- Spring data JPA
+- PostgreSQL Driver
+- JJWT :: API, JJWT :: Impl, JJWT :: Extensions :: Jackson
+
 ## TASKS
 
 - Configurações do Security
